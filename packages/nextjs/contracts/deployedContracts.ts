@@ -6,66 +6,12 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
 const deployedContracts = {
   31337: {
-    BuyMeACoffee: {
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    BlockNumber: {
+      address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
       abi: [
         {
           inputs: [],
-          stateMutability: "nonpayable",
-          type: "constructor",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "address",
-              name: "from",
-              type: "address",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "timestamp",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "string",
-              name: "name",
-              type: "string",
-            },
-            {
-              indexed: false,
-              internalType: "string",
-              name: "message",
-              type: "string",
-            },
-          ],
-          name: "NewMemo",
-          type: "event",
-        },
-        {
-          inputs: [
-            {
-              internalType: "string",
-              name: "_name",
-              type: "string",
-            },
-            {
-              internalType: "string",
-              name: "_message",
-              type: "string",
-            },
-          ],
-          name: "buyCoffee",
-          outputs: [],
-          stateMutability: "payable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "getContractBalance",
+          name: "getBlockNumber",
           outputs: [
             {
               internalType: "uint256",
@@ -76,46 +22,23 @@ const deployedContracts = {
           stateMutability: "view",
           type: "function",
         },
+      ],
+      inheritedFunctions: {},
+    },
+    BuyMeACoffee: {
+      address: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+      abi: [
         {
           inputs: [],
-          name: "getMemos",
+          name: "blockNumber",
           outputs: [
             {
-              components: [
-                {
-                  internalType: "address",
-                  name: "from",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "timestamp",
-                  type: "uint256",
-                },
-                {
-                  internalType: "string",
-                  name: "name",
-                  type: "string",
-                },
-                {
-                  internalType: "string",
-                  name: "message",
-                  type: "string",
-                },
-              ],
-              internalType: "struct BuyMeACoffee.Memo[]",
+              internalType: "uint256",
               name: "",
-              type: "tuple[]",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "withdrawTips",
-          outputs: [],
-          stateMutability: "nonpayable",
           type: "function",
         },
       ],
@@ -124,7 +47,26 @@ const deployedContracts = {
   },
   11155111: {
     BuyMeACoffee: {
-      address: "0x2f8eAaad46F0Ba526c01262B7C456b2EE015a6B2",
+      address: "0x558e670C64766Fb7992252E14F020C0F7383D5A1",
+      abi: [
+        {
+          inputs: [],
+          name: "blockNumber",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {},
+    },
+    RockPaperScissors: {
+      address: "0xfAF7ab27AB44075204D49c2B24C9034C10ff75d9",
       abi: [
         {
           inputs: [],
@@ -137,79 +79,83 @@ const deployedContracts = {
             {
               indexed: true,
               internalType: "address",
-              name: "from",
+              name: "owner",
               type: "address",
             },
             {
               indexed: false,
               internalType: "uint256",
-              name: "timestamp",
+              name: "amount",
               type: "uint256",
             },
-            {
-              indexed: false,
-              internalType: "string",
-              name: "name",
-              type: "string",
-            },
-            {
-              indexed: false,
-              internalType: "string",
-              name: "message",
-              type: "string",
-            },
           ],
-          name: "NewMemo",
+          name: "FundsWithdrawn",
           type: "event",
         },
         {
+          anonymous: false,
           inputs: [
             {
-              internalType: "string",
-              name: "_name",
-              type: "string",
+              indexed: true,
+              internalType: "address",
+              name: "player",
+              type: "address",
             },
             {
-              internalType: "string",
-              name: "_message",
-              type: "string",
+              indexed: false,
+              internalType: "uint8",
+              name: "playerChoice",
+              type: "uint8",
+            },
+            {
+              indexed: false,
+              internalType: "uint8",
+              name: "contractChoice",
+              type: "uint8",
+            },
+            {
+              indexed: false,
+              internalType: "uint8",
+              name: "result",
+              type: "uint8",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "payout",
+              type: "uint256",
             },
           ],
-          name: "buyCoffee",
-          outputs: [],
-          stateMutability: "payable",
-          type: "function",
+          name: "GamePlayed",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "previousOwner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "OwnershipTransferred",
+          type: "event",
         },
         {
           inputs: [],
-          name: "getMemos",
+          name: "getBalance",
           outputs: [
             {
-              components: [
-                {
-                  internalType: "address",
-                  name: "from",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "timestamp",
-                  type: "uint256",
-                },
-                {
-                  internalType: "string",
-                  name: "name",
-                  type: "string",
-                },
-                {
-                  internalType: "string",
-                  name: "message",
-                  type: "string",
-                },
-              ],
-              internalType: "struct BuyMeACoffee.Memo[]",
+              internalType: "uint256",
               name: "",
-              type: "tuple[]",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
@@ -217,13 +163,67 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "withdrawTips",
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint8",
+              name: "_playerChoice",
+              type: "uint8",
+            },
+          ],
+          name: "play",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "renounceOwnership",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
         },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "transferOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "withdraw",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          stateMutability: "payable",
+          type: "receive",
+        },
       ],
-      inheritedFunctions: {},
+      inheritedFunctions: {
+        owner: "@openzeppelin/contracts/access/Ownable.sol",
+        renounceOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+        transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+      },
     },
   },
 } as const;

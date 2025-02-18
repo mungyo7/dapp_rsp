@@ -21,3 +21,12 @@ node_modules
 
 # cli
 dist
+
+node_modules/
+.env
+.env.local
+coverage/
+coverage.json
+typechain/
+typechain-types/
+.DS_Store

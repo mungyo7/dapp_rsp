@@ -1,0 +1,38 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/BuyMeACoffee.sol": {
+      "content": "//SPDX-License-Identifier: MIT\r\npragma solidity >=0.8.0 <0.9.0;\r\n\r\ncontract BuyMeACoffee {\r\n    function blockNumber() public view returns (uint256) {\r\n        return block.number;\r\n    }\r\n} "
+    },
+    "contracts/RockPaperScissors.sol": {
+      "content": "// SPDX-License-Identifier: MIT\r\npragma solidity >=0.8.0 <0.9.0;\r\n\r\ncontract RockPaperScissors {\r\n    // 게임 결과를 저장하는 이벤트\r\n    event GamePlayed(address player, uint8 playerChoice, uint8 contractChoice, uint8 result, uint256 payout);\r\n\r\n    // 게임 비용\r\n    uint256 public constant GAME_COST = 0.01 ether;\r\n    \r\n    // 게임 결과 상수\r\n    uint8 public constant LOSS = 0;\r\n    uint8 public constant DRAW = 1;\r\n    uint8 public constant WIN = 2;\r\n\r\n    // 가위바위보 선택 상수 (블록넘버 % 3과 일치하도록)\r\n    uint8 public constant SCISSORS = 2;  // 가위\r\n    uint8 public constant ROCK = 1;      // 바위\r\n    uint8 public constant PAPER = 0;     // 보\r\n\r\n    // 컨트랙트 소유자\r\n    address public owner;\r\n\r\n    constructor() {\r\n        owner = msg.sender;\r\n    }\r\n\r\n    // 게임 플레이 함수\r\n    function play(uint8 _playerChoice) public payable {\r\n        // 정확한 금액이 전송되었는지 확인\r\n        require(msg.value == GAME_COST, \"Please send exactly 0.01 ETH\");\r\n        // 올바른 선택인지 확인\r\n        require(_playerChoice <= 2, \"Invalid choice\");\r\n\r\n        // 현재 블록 넘버로 컨트랙트의 선택 결정\r\n        uint8 contractChoice = uint8(block.number % 3);\r\n        \r\n        // 게임 결과 계산\r\n        uint8 result = determineWinner(_playerChoice, contractChoice);\r\n        \r\n        // 상금 지급\r\n        uint256 payout = 0;\r\n        if (result == WIN) {\r\n            payout = GAME_COST * 2;\r\n            (bool success, ) = payable(msg.sender).call{value: payout}(\"\");\r\n            require(success, \"Failed to send payout\");\r\n        } else if (result == DRAW) {\r\n            payout = GAME_COST;\r\n            (bool success, ) = payable(msg.sender).call{value: payout}(\"\");\r\n            require(success, \"Failed to send payout\");\r\n        }\r\n\r\n        // 이벤트 발생\r\n        emit GamePlayed(msg.sender, _playerChoice, contractChoice, result, payout);\r\n    }\r\n\r\n    // 승자 결정 함수\r\n    function determineWinner(uint8 _playerChoice, uint8 _contractChoice) private pure returns (uint8) {\r\n        if (_playerChoice == _contractChoice) {\r\n            return DRAW;\r\n        }\r\n        \r\n        if (\r\n            (_playerChoice == ROCK && _contractChoice == SCISSORS) ||\r\n            (_playerChoice == PAPER && _contractChoice == ROCK) ||\r\n            (_playerChoice == SCISSORS && _contractChoice == PAPER)\r\n        ) {\r\n            return WIN;\r\n        }\r\n        \r\n        return LOSS;\r\n    }\r\n\r\n    // 컨트랙트 잔액 확인\r\n    function getBalance() public view returns (uint256) {\r\n        return address(this).balance;\r\n    }\r\n\r\n    // 컨트랙트 소유자만 잔액 인출 가능\r\n    function withdraw() public {\r\n        require(msg.sender == owner, \"Only owner can withdraw\");\r\n        (bool success, ) = payable(owner).call{value: address(this).balance}(\"\");\r\n        require(success, \"Withdrawal failed\");\r\n    }\r\n\r\n    // 컨트랙트가 ETH를 받을 수 있도록 하는 함수\r\n    receive() external payable {}\r\n} "
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
