@@ -67,9 +67,9 @@ export const Header = () => {
     <div className="sticky lg:static top-0 navbar bg-base-100 min-h-0 flex-shrink-0 justify-between z-20 shadow-md shadow-secondary px-0 sm:px-2">
       <div className="navbar-start">
         <Image
-          src="/rsp.png"
+          src="/rsp_logo.png"
           alt="RSP Logo"
-          width={150}
+          width={50}
           height={50}
           className="cursor-pointer"
         />

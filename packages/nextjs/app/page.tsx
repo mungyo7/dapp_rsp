@@ -10,6 +10,16 @@ import { notification } from "~~/utils/scaffold-eth";
 export default function Home() {
   const [currentBlock, setCurrentBlock] = useState<number>(0);
   const [betAmount, setBetAmount] = useState<string>("0.01");
+  const [gameHistory, setGameHistory] = useState<{
+    result: number;
+    payout: bigint;
+    playerChoice: number;
+    contractChoice: number;
+    timestamp: number;
+    txHash: string;
+    userAddress: `0x${string}`;
+    betAmount: string;
+  }[]>([]);
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const { data: deployedContractData } = useDeployedContractInfo("RockPaperScissors");
@@ -22,12 +32,6 @@ export default function Home() {
 
   // 컨트랙트 잔액 상태
   const [contractBalance, setContractBalance] = useState<bigint>(BigInt(0));
-  const [lastGameResult, setLastGameResult] = useState<{
-    result: number;
-    payout: bigint;
-    playerChoice: number;
-    contractChoice: number;
-  } | null>(null);
 
   // 컨트랙트 잔액 읽기
   useEffect(() => {
@@ -70,6 +74,13 @@ export default function Home() {
       return;
     }
 
+    // 컨트랙트 잔액과 베팅 금액 비교
+    const betAmountWei = parseEther(betAmount);
+    if (betAmountWei > contractBalance) {
+      notification.error("베팅 금액이 너무 큽니다. 컨트랙트의 잔액이 부족합니다.");
+      return;
+    }
+
     const notificationId = notification.loading("게임 진행 중...");
 
     try {
@@ -77,8 +88,8 @@ export default function Home() {
       console.log("Bet Amount:", betAmount); // 디버깅을 위한 로그 추가
       
       const hash = await rpsContract.write.play(
-        [choice + 1],
-        { value: parseEther(betAmount) }
+        [choice],
+        { value: betAmountWei }
       );
       
       // 트랜잭션 완료 대기
@@ -100,12 +111,19 @@ export default function Home() {
           data: log.data,
           topics: log.topics,
         });
-        setLastGameResult({
+        const gameResult = {
           result: Number(decodedData.args.result),
           payout: decodedData.args.payout,
           playerChoice: Number(decodedData.args.playerChoice),
           contractChoice: Number(decodedData.args.contractChoice),
-        });
+          timestamp: Date.now(),
+          txHash: hash,
+          userAddress: walletClient?.account.address as `0x${string}`,
+          betAmount: betAmount
+        };
+        
+        // 히스토리에 새로운 게임 결과 추가
+        setGameHistory(prev => [gameResult, ...prev]);
       }
       
       // 잔액 업데이트
@@ -132,7 +150,7 @@ export default function Home() {
     };
 
     updateBlockNumber();
-    const interval = setInterval(updateBlockNumber, 5000);
+    const interval = setInterval(updateBlockNumber, 2000);
     return () => clearInterval(interval);
   }, [publicClient]);
 
@@ -156,87 +174,187 @@ export default function Home() {
     }
   };
 
+  // withdraw 함수 추가
+  const handleWithdraw = async () => {
+    if (!rpsContract || !publicClient) {
+      notification.error("컨트랙트가 연결되지 않았습니다");
+      return;
+    }
+
+    const notificationId = notification.loading("출금 진행 중...");
+
+    try {
+      const hash = await rpsContract.write.withdraw();
+      await publicClient.waitForTransactionReceipt({ hash });
+
+      // 잔액 업데이트
+      const newBalance = await rpsContract.read.getBalance();
+      setContractBalance(newBalance);
+
+      notification.remove(notificationId);
+      notification.success("출금이 완료되었습니다!");
+    } catch (error: any) {
+      notification.remove(notificationId);
+      console.error("출금 중 오류:", error);
+      notification.error(
+        `출금 실패: ${error.message}`
+      );
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center py-8">
       <h1 className="text-4xl font-bold mb-8">가위바위보 게임</h1>
       
-      <div className="bg-base-100 shadow-lg rounded-lg p-6 w-96">
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold mb-2">Current Block Number</h2>
-          <p className="text-3xl font-mono">{currentBlock}</p>
-        </div>
-
-        <div className="my-6">
-          <h2 className="text-xl font-semibold mb-4">게임 플레이</h2>
+      <div className="flex flex-row justify-center gap-8">
+        {/* 왼쪽 메인 게임 섹션 */}
+        <div className="bg-base-100 shadow-lg rounded-lg p-6 w-96">
           <div className="mb-4">
-            <label className="text-sm text-gray-500">베팅 금액 (ETH):</label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={betAmount}
-              onChange={(e) => setBetAmount(e.target.value)}
-              className="input input-bordered w-full mt-1"
-              placeholder="베팅 금액을 입력하세요"
-            />
+            <h2 className="text-xl font-semibold mb-2">Current Block Number</h2>
+            <p className="text-3xl font-mono">{currentBlock}</p>
           </div>
-          <div className="flex justify-between gap-2">
-            <button
-              className="btn btn-primary flex-1"
-              onClick={() => handlePlay(2)}
-            >
-              ✋ 보
-            </button>
-            <button
-              className="btn btn-primary flex-1"
-              onClick={() => handlePlay(1)}
-            >
-              ✊ 바위
-            </button>
-            <button
-              className="btn btn-primary flex-1"
-              onClick={() => handlePlay(3)}
-            >
-              ✌️ 가위
-            </button>
+
+          <div className="my-6">
+            <h2 className="text-xl font-semibold mb-4">게임 플레이</h2>
+            <div className="mb-4">
+              <label className="text-sm text-gray-500">베팅 금액 (ETH):</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={betAmount}
+                onChange={(e) => setBetAmount(e.target.value)}
+                className="input input-bordered w-full mt-1"
+                placeholder="베팅 금액을 입력하세요"
+              />
+            </div>
+            <div className="flex justify-between gap-2">
+              <button
+                className="btn btn-primary flex-1"
+                onClick={() => handlePlay(1)}
+              >
+                ✊ 바위
+              </button>
+              <button
+                className="btn btn-primary flex-1"
+                onClick={() => handlePlay(2)}
+              >
+                ✋ 보
+              </button>
+              <button
+                className="btn btn-primary flex-1"
+                onClick={() => handlePlay(3)}
+              >
+                ✌️ 가위
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <h2 className="text-xl font-semibold mb-2">컨트랙트 정보</h2>
+            {deployedContractData && (
+              <div className="mb-2">
+                <h3 className="text-sm font-semibold">주소:</h3>
+                <Address address={deployedContractData.address} />
+              </div>
+            )}
+            <div>
+              <h3 className="text-sm font-semibold">잔액:</h3>
+              <p className="text-xl font-mono">
+                {contractBalance ? Number(contractBalance) / 1e18 : "0"} ETH
+              </p>
+              <button
+                className="btn btn-secondary mt-2"
+                onClick={handleWithdraw}
+              >
+                컨트랙트 잔액 출금
+              </button>
+            </div>
           </div>
         </div>
 
-        {lastGameResult && (
-          <div className="my-6 p-4 bg-base-200 rounded-lg">
-            <h2 className="text-xl font-semibold mb-2">최근 게임 결과</h2>
-            <div className="space-y-2">
-              <p>
-                플레이어의 선택: {getChoiceEmoji(lastGameResult.playerChoice)}{" "}
-                {getChoiceText(lastGameResult.playerChoice)}
-              </p>
-              <p>
-                컨트랙트의 선택: {getChoiceEmoji(lastGameResult.contractChoice)}{" "}
-                {getChoiceText(lastGameResult.contractChoice)}
-              </p>
-              <p className="font-bold">
-                결과: {getResultText(lastGameResult.result)}
-              </p>
-              <p>
-                받은 금액: {Number(lastGameResult.payout) / 1e18} ETH
-              </p>
-            </div>
+        {/* 오른쪽 게임 히스토리 섹션 */}
+        <div className="bg-base-100 shadow-lg rounded-lg p-6 w-96">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">게임 히스토리</h2>
+            <span className="bg-primary text-white px-3 py-1 rounded-full text-sm">
+              총 {gameHistory.length}게임
+            </span>
           </div>
-        )}
+          
+          <div className="space-y-4 max-h-[80vh] overflow-y-auto pr-2 custom-scrollbar">
+            {gameHistory.map((game, index) => (
+              <div 
+                key={index} 
+                className="bg-base-200 rounded-xl p-4 transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div className="text-xl font-bold">
+                    {getResultText(game.result).includes("승리") ? (
+                      <span className="text-success">승리 🎉</span>
+                    ) : getResultText(game.result).includes("무승부") ? (
+                      <span className="text-warning">무승부 🤝</span>
+                    ) : (
+                      <span className="text-error">패배 😢</span>
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    {new Date(game.timestamp).toLocaleString()}
+                  </span>
+                </div>
 
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold mb-2">컨트랙트 정보</h2>
-          {deployedContractData && (
-            <div className="mb-2">
-              <h3 className="text-sm font-semibold">주소:</h3>
-              <Address address={deployedContractData.address} />
-            </div>
-          )}
-          <div>
-            <h3 className="text-sm font-semibold">잔액:</h3>
-            <p className="text-xl font-mono">
-              {contractBalance ? Number(contractBalance) / 1e18 : "0"} ETH
-            </p>
+                <div className="mb-3 p-2 bg-base-300 rounded-lg">
+                  <div className="text-sm text-gray-500 mb-1">플레이어 주소</div>
+                  <Address address={game.userAddress} />
+                </div>
+
+                <div className="flex justify-center items-center gap-4 my-4 p-3 bg-base-300 rounded-lg">
+                  <div className="text-center">
+                    <div className="text-3xl mb-1">{getChoiceEmoji(game.playerChoice)}</div>
+                    <div className="text-sm">플레이어</div>
+                  </div>
+                  <div className="text-xl font-bold">VS</div>
+                  <div className="text-center">
+                    <div className="text-3xl mb-1">{getChoiceEmoji(game.contractChoice)}</div>
+                    <div className="text-sm">컨트랙트</div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center mt-3">
+                  <div className={`font-semibold ${
+                    game.result === 2 ? 'text-success' : // 승리
+                    game.result === 1 ? 'text-warning' : // 무승부
+                    'text-error' // 패배
+                  }`}>
+                    {game.result === 2 ? (
+                      `+${game.betAmount} ETH`
+                    ) : game.result === 1 ? (
+                      `±0 ETH`
+                    ) : (
+                      `-${game.betAmount} ETH`
+                    )}
+                  </div>
+                  <a 
+                    href={`https://sepolia.etherscan.io/tx/${game.txHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs text-primary hover:text-primary-focus transition-colors"
+                  >
+                    <span>트랜잭션 보기</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            ))}
+            {gameHistory.length === 0 && (
+              <div className="text-center py-10">
+                <div className="text-4xl mb-3">🎮</div>
+                <p className="text-gray-500">아직 게임 기록이 없습니다</p>
+                <p className="text-sm text-gray-400">첫 게임을 시작해보세요!</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

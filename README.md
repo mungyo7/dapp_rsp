@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Scaffold-ETH 2로 간단한 Payment 만들기 (Defi)
 
 ## 🚩 Step 0. DeFi란?
@@ -164,3 +165,6 @@ withdrawTips 함수를 실행하면 위의 balance가 배포자의 주소로 송
 **[buyCoffee 함수 Sequence]**
 
 <img src='./images/buy_a_coffee_sequence.png' width='400px'></img>
+=======
+f
+>>>>>>> 2c16eb307ef40fb1e089b57e40c76868e041d88e
