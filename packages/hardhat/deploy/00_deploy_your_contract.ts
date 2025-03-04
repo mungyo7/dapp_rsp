@@ -22,6 +22,14 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
 
+  // 기본 네트워크가 arbitrum인지 확인
+  console.log("Deploying to network:", hre.network.name);
+  
+  // Arbitrum 특정 설정 추가 (필요한 경우)
+  if (hre.network.name === "arbitrum") {
+    // Arbitrum 특정 로직
+  }
+
   await deploy("RockPaperScissors", {
     from: deployer,
     args: [],

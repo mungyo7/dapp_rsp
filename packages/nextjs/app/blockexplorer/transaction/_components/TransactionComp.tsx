@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Hash, Transaction, TransactionReceipt, formatEther, formatUnits } from "viem";
 import { hardhat } from "viem/chains";
-import { usePublicClient } from "wagmi";
+import { usePublicClient, useAccount } from "wagmi";
 import { Address } from "~~/components/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { decodeTransactionData, getFunctionDetails } from "~~/utils/scaffold-eth";
 import { replacer } from "~~/utils/scaffold-eth/common";
+
+// Arbitrum 네트워크 정의
+const ARBITRUM_CHAIN_ID = 42161;
 
 const TransactionComp = ({ txHash }: { txHash: Hash }) => {
   const client = usePublicClient({ chainId: hardhat.id });
@@ -16,8 +19,12 @@ const TransactionComp = ({ txHash }: { txHash: Hash }) => {
   const [transaction, setTransaction] = useState<Transaction>();
   const [receipt, setReceipt] = useState<TransactionReceipt>();
   const [functionCalled, setFunctionCalled] = useState<string>();
+  const { chain } = useAccount();
 
   const { targetNetwork } = useTargetNetwork();
+  
+  // Arbitrum 체인 확인
+  const isArbitrum = chain?.id === ARBITRUM_CHAIN_ID;
 
   useEffect(() => {
     if (txHash && client) {
@@ -44,7 +51,19 @@ const TransactionComp = ({ txHash }: { txHash: Hash }) => {
       </button>
       {transaction ? (
         <div className="overflow-x-auto">
-          <h2 className="text-3xl font-bold mb-4 text-center text-primary-content">Transaction Details</h2>{" "}
+          <h2 className="text-3xl font-bold mb-4 text-center text-primary-content">Transaction Details</h2>
+          {isArbitrum && (
+            <div className="text-center mb-4">
+              <a
+                href={`https://arbiscan.io/tx/${txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-sm btn-secondary"
+              >
+                View on Arbiscan
+              </a>
+            </div>
+          )}
           <table className="table rounded-lg bg-base-100 w-full shadow-lg md:table-lg table-md">
             <tbody>
               <tr>

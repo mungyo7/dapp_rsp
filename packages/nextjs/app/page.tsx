@@ -335,7 +335,7 @@ export default function Home() {
                     )}
                   </div>
                   <a 
-                    href={`https://sepolia.etherscan.io/tx/${game.txHash}`}
+                    href={`https://arbiscan.io/tx/${game.txHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 text-xs text-primary hover:text-primary-focus transition-colors"

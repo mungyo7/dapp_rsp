@@ -11,6 +11,10 @@ import { useNetworkColor } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
 
+// Arbitrum 네트워크 ID 정의
+const ARBITRUM_CHAIN_ID = 42161; // Arbitrum One 메인넷
+// const ARBITRUM_SEPOLIA_CHAIN_ID = 421614; // Arbitrum Sepolia 테스트넷 필요시 주석 해제
+
 /**
  * Custom Wagmi Connect Button (watch balance + custom design)
  */
@@ -37,7 +41,8 @@ export const RainbowKitCustomConnectButton = () => {
                 );
               }
 
-              if (chain.unsupported || chain.id !== targetNetwork.id) {
+              // Sepolia 또는 Arbitrum 네트워크 허용
+              if (chain.unsupported || (chain.id !== targetNetwork.id && chain.id !== ARBITRUM_CHAIN_ID)) {
                 return <WrongNetworkDropdown />;
               }
 

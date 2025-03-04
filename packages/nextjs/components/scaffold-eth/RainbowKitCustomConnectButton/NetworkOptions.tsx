@@ -4,7 +4,32 @@ import { ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
 import { getNetworkColor } from "~~/hooks/scaffold-eth";
 import { getTargetNetworks } from "~~/utils/scaffold-eth";
 
-const allowedNetworks = getTargetNetworks();
+// Arbitrum 네트워크 정의
+const ARBITRUM_CHAIN_ID = 42161;
+const ARBITRUM_NETWORK = {
+  id: ARBITRUM_CHAIN_ID,
+  name: "Arbitrum One",
+  network: "arbitrum",
+  nativeCurrency: {
+    name: "Ether",
+    symbol: "ETH",
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: { http: ["https://arb1.arbitrum.io/rpc"] },
+    public: { http: ["https://arb1.arbitrum.io/rpc"] },
+  },
+  blockExplorers: {
+    default: { name: "Arbiscan", url: "https://arbiscan.io" },
+  },
+};
+
+const allowedNetworks = [...getTargetNetworks()];
+
+// Arbitrum 네트워크가 없으면 추가
+if (!allowedNetworks.some(network => network.id === ARBITRUM_CHAIN_ID)) {
+  allowedNetworks.push(ARBITRUM_NETWORK);
+}
 
 type NetworkOptionsProps = {
   hidden?: boolean;

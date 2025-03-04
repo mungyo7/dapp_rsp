@@ -8,7 +8,12 @@ import { PaginationButton } from "./PaginationButton";
 import { TransactionsTable } from "./TransactionsTable";
 import { createPublicClient, http } from "viem";
 import { hardhat } from "viem/chains";
+import { useAccount } from "wagmi";
 import { useFetchBlocks } from "~~/hooks/scaffold-eth";
+
+// Arbitrum 네트워크 정의
+const ARBITRUM_CHAIN_ID = 42161;
+const ARBITRUM_RPC_URL = "https://arb1.arbitrum.io/rpc";
 
 type AddressCodeTabProps = {
   bytecode: string;
@@ -20,24 +25,43 @@ type PageProps = {
   contractData: AddressCodeTabProps | null;
 };
 
+// 기본 클라이언트 설정
 const publicClient = createPublicClient({
   chain: hardhat,
   transport: http(),
+});
+
+// Arbitrum 클라이언트 설정
+const arbitrumClient = createPublicClient({
+  chain: {
+    ...hardhat,
+    id: ARBITRUM_CHAIN_ID,
+  },
+  transport: http(ARBITRUM_RPC_URL),
 });
 
 export const ContractTabs = ({ address, contractData }: PageProps) => {
   const { blocks, transactionReceipts, currentPage, totalBlocks, setCurrentPage } = useFetchBlocks();
   const [activeTab, setActiveTab] = useState("transactions");
   const [isContract, setIsContract] = useState(false);
+  const { chain } = useAccount();
+  
+  // Arbitrum 체인 확인
+  const isArbitrum = chain?.id === ARBITRUM_CHAIN_ID;
+  
+  // 현재 체인에 맞는 클라이언트 선택
+  const client = isArbitrum ? arbitrumClient : publicClient;
 
   useEffect(() => {
     const checkIsContract = async () => {
-      const contractCode = await publicClient.getBytecode({ address: address });
+      const contractCode = await client.getBytecode({ 
+        address: address as `0x${string}` 
+      });
       setIsContract(contractCode !== undefined && contractCode !== "0x");
     };
 
     checkIsContract();
-  }, [address]);
+  }, [address, client]);
 
   const filteredBlocks = blocks.filter(block =>
     block.transactions.some(tx => {
@@ -85,8 +109,8 @@ export const ContractTabs = ({ address, contractData }: PageProps) => {
       {activeTab === "code" && contractData && (
         <AddressCodeTab bytecode={contractData.bytecode} assembly={contractData.assembly} />
       )}
-      {activeTab === "storage" && <AddressStorageTab address={address} />}
-      {activeTab === "logs" && <AddressLogsTab address={address} />}
+      {activeTab === "storage" && <AddressStorageTab address={address as `0x${string}`} />}
+      {activeTab === "logs" && <AddressLogsTab address={address as `0x${string}`} />}
     </>
   );
 };

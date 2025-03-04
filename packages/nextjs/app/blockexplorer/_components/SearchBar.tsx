@@ -4,13 +4,32 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { isAddress, isHex } from "viem";
 import { hardhat } from "viem/chains";
-import { usePublicClient } from "wagmi";
+import { usePublicClient, useAccount } from "wagmi";
+import { createPublicClient, http } from "viem";
+
+// Arbitrum 네트워크 정의
+const ARBITRUM_CHAIN_ID = 42161;
+const ARBITRUM_RPC_URL = "https://arb1.arbitrum.io/rpc";
+
+// Arbitrum 클라이언트 설정
+const arbitrumClient = createPublicClient({
+  chain: {
+    ...hardhat,
+    id: ARBITRUM_CHAIN_ID,
+  },
+  transport: http(ARBITRUM_RPC_URL),
+});
 
 export const SearchBar = () => {
   const [searchInput, setSearchInput] = useState("");
   const router = useRouter();
+  const { chain } = useAccount();
+  
+  // Arbitrum 체인 확인
+  const isArbitrum = chain?.id === ARBITRUM_CHAIN_ID;
 
-  const client = usePublicClient({ chainId: hardhat.id });
+  const localClient = usePublicClient({ chainId: hardhat.id });
+  const client = isArbitrum ? arbitrumClient : localClient;
 
   const handleSearch = async (event: React.FormEvent) => {
     event.preventDefault();

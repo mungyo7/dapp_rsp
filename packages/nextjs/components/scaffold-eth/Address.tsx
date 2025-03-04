@@ -6,11 +6,15 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import { Address as AddressType, getAddress, isAddress } from "viem";
 import { hardhat } from "viem/chains";
 import { normalize } from "viem/ens";
-import { useEnsAvatar, useEnsName } from "wagmi";
+import { useEnsAvatar, useEnsName, useAccount } from "wagmi";
 import { CheckCircleIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
+
+// Arbitrum 네트워크 ID 정의
+const ARBITRUM_CHAIN_ID = 42161;
+const ARBITRUM_BLOCK_EXPLORER = "https://arbiscan.io/address/";
 
 type AddressProps = {
   address?: AddressType;
@@ -39,6 +43,8 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
   const checkSumAddress = address ? getAddress(address) : undefined;
 
   const { targetNetwork } = useTargetNetwork();
+  const { chain } = useAccount();
+  const isArbitrum = chain?.id === ARBITRUM_CHAIN_ID;
 
   const { data: fetchedEns } = useEnsName({
     address: checkSumAddress,
@@ -81,7 +87,11 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
     return <span className="text-error">Wrong address</span>;
   }
 
-  const blockExplorerAddressLink = getBlockExplorerAddressLink(targetNetwork, checkSumAddress);
+  // Arbitrum 체인인 경우 Arbitrum Block Explorer 링크 사용
+  const blockExplorerAddressLink = isArbitrum 
+    ? `${ARBITRUM_BLOCK_EXPLORER}${checkSumAddress}`
+    : getBlockExplorerAddressLink(targetNetwork, checkSumAddress);
+
   let displayAddress = checkSumAddress?.slice(0, 6) + "..." + checkSumAddress?.slice(-4);
 
   if (ens) {
@@ -101,7 +111,7 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
       </div>
       {disableAddressLink ? (
         <span className={`ml-1.5 text-${size} font-normal`}>{displayAddress}</span>
-      ) : targetNetwork.id === hardhat.id ? (
+      ) : targetNetwork.id === hardhat.id && !isArbitrum ? (
         <span className={`ml-1.5 text-${size} font-normal`}>
           <Link href={blockExplorerAddressLink}>{displayAddress}</Link>
         </span>

@@ -1,10 +1,14 @@
 "use client";
 
 import { Address, formatEther } from "viem";
+import { useAccount } from "wagmi";
 import { useDisplayUsdMode } from "~~/hooks/scaffold-eth/useDisplayUsdMode";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { useWatchBalance } from "~~/hooks/scaffold-eth/useWatchBalance";
 import { useGlobalState } from "~~/services/store/store";
+
+// Arbitrum 네트워크 ID 정의
+const ARBITRUM_CHAIN_ID = 42161;
 
 type BalanceProps = {
   address?: Address;
@@ -17,8 +21,12 @@ type BalanceProps = {
  */
 export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
   const { targetNetwork } = useTargetNetwork();
+  const { chain } = useAccount();
   const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrency.price);
   const isNativeCurrencyPriceFetching = useGlobalState(state => state.nativeCurrency.isFetching);
+  
+  // Arbitrum 체인 확인
+  const isArbitrum = chain?.id === ARBITRUM_CHAIN_ID;
 
   const {
     data: balance,
@@ -50,6 +58,8 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
   }
 
   const formattedBalance = balance ? Number(formatEther(balance.value)) : 0;
+  // Arbitrum도 ETH를 사용하므로 통화 기호는 ETH 유지
+  const currencySymbol = "ETH";
 
   return (
     <button
@@ -65,7 +75,7 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
         ) : (
           <>
             <span>{formattedBalance.toFixed(4)}</span>
-            <span className="text-[0.8em] font-bold ml-1">{targetNetwork.nativeCurrency.symbol}</span>
+            <span className="text-[0.8em] font-bold ml-1">{isArbitrum ? currencySymbol : targetNetwork.nativeCurrency.symbol}</span>
           </>
         )}
       </div>
