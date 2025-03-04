@@ -24,7 +24,7 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
   const { chain } = useAccount();
   const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrency.price);
   const isNativeCurrencyPriceFetching = useGlobalState(state => state.nativeCurrency.isFetching);
-  
+
   // Arbitrum 체인 확인
   const isArbitrum = chain?.id === ARBITRUM_CHAIN_ID;
 
@@ -75,7 +75,9 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
         ) : (
           <>
             <span>{formattedBalance.toFixed(4)}</span>
-            <span className="text-[0.8em] font-bold ml-1">{isArbitrum ? currencySymbol : targetNetwork.nativeCurrency.symbol}</span>
+            <span className="text-[0.8em] font-bold ml-1">
+              {isArbitrum ? currencySymbol : targetNetwork.nativeCurrency.symbol}
+            </span>
           </>
         )}
       </div>

@@ -45,17 +45,17 @@ export const ContractTabs = ({ address, contractData }: PageProps) => {
   const [activeTab, setActiveTab] = useState("transactions");
   const [isContract, setIsContract] = useState(false);
   const { chain } = useAccount();
-  
+
   // Arbitrum 체인 확인
   const isArbitrum = chain?.id === ARBITRUM_CHAIN_ID;
-  
+
   // 현재 체인에 맞는 클라이언트 선택
   const client = isArbitrum ? arbitrumClient : publicClient;
 
   useEffect(() => {
     const checkIsContract = async () => {
-      const contractCode = await client.getBytecode({ 
-        address: address as `0x${string}` 
+      const contractCode = await client.getBytecode({
+        address: address as `0x${string}`,
       });
       setIsContract(contractCode !== undefined && contractCode !== "0x");
     };

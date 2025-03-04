@@ -10,20 +10,22 @@ import { notification } from "~~/utils/scaffold-eth";
 export default function Home() {
   const [currentBlock, setCurrentBlock] = useState<number>(0);
   const [betAmount, setBetAmount] = useState<string>("0.01");
-  const [gameHistory, setGameHistory] = useState<{
-    result: number;
-    payout: bigint;
-    playerChoice: number;
-    contractChoice: number;
-    timestamp: number;
-    txHash: string;
-    userAddress: `0x${string}`;
-    betAmount: string;
-  }[]>([]);
+  const [gameHistory, setGameHistory] = useState<
+    {
+      result: number;
+      payout: bigint;
+      playerChoice: number;
+      contractChoice: number;
+      timestamp: number;
+      txHash: string;
+      userAddress: `0x${string}`;
+      betAmount: string;
+    }[]
+  >([]);
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const { data: deployedContractData } = useDeployedContractInfo("RockPaperScissors");
-  
+
   // 컨트랙트 인스턴스
   const { data: rpsContract } = useScaffoldContract({
     contractName: "RockPaperScissors",
@@ -54,10 +56,14 @@ export default function Home() {
   // 게임 결과 텍스트 반환
   const getResultText = (result: number) => {
     switch (result) {
-      case 0: return "패배 (베팅 금액을 잃었습니다)";
-      case 1: return "무승부 (베팅 금액이 환불됩니다)";
-      case 2: return "승리 (베팅 금액의 2배를 받았습니다)";
-      default: return "";
+      case 0:
+        return "패배 (베팅 금액을 잃었습니다)";
+      case 1:
+        return "무승부 (베팅 금액이 환불됩니다)";
+      case 2:
+        return "승리 (베팅 금액의 2배를 받았습니다)";
+      default:
+        return "";
     }
   };
 
@@ -86,15 +92,12 @@ export default function Home() {
     try {
       console.log("Choice:", choice); // 디버깅을 위한 로그 추가
       console.log("Bet Amount:", betAmount); // 디버깅을 위한 로그 추가
-      
-      const hash = await rpsContract.write.play(
-        [choice],
-        { value: betAmountWei }
-      );
-      
+
+      const hash = await rpsContract.write.play([choice], { value: betAmountWei });
+
       // 트랜잭션 완료 대기
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      
+
       // 이벤트에서 게임 결과 가져오기
       const logs = await publicClient.getLogs({
         address: deployedContractData?.address,
@@ -107,7 +110,7 @@ export default function Home() {
         const log = logs[0];
         const decodedData = decodeEventLog({
           abi: rpsContract.abi,
-          eventName: 'GamePlayed',
+          eventName: "GamePlayed",
           data: log.data,
           topics: log.topics,
         });
@@ -119,13 +122,13 @@ export default function Home() {
           timestamp: Date.now(),
           txHash: hash,
           userAddress: walletClient?.account.address as `0x${string}`,
-          betAmount: betAmount
+          betAmount: betAmount,
         };
-        
+
         // 히스토리에 새로운 게임 결과 추가
         setGameHistory(prev => [gameResult, ...prev]);
       }
-      
+
       // 잔액 업데이트
       const newBalance = await rpsContract.read.getBalance();
       setContractBalance(newBalance);
@@ -136,7 +139,7 @@ export default function Home() {
       notification.remove(notificationId);
       console.error("게임 플레이 중 오류:", error);
       notification.error(
-        `게임 플레이 실패: ${error.message}` // 에러 메시지 상세 표시
+        `게임 플레이 실패: ${error.message}`, // 에러 메시지 상세 표시
       );
     }
   };
@@ -157,10 +160,14 @@ export default function Home() {
   // 선택에 따른 이모지 반환
   const getChoiceEmoji = (choice: number) => {
     switch (choice) {
-      case 1: return "✊"; // 바위
-      case 2: return "✋"; // 보
-      case 3: return "✌️"; // 가위
-      default: return "";
+      case 1:
+        return "✊"; // 바위
+      case 2:
+        return "✋"; // 보
+      case 3:
+        return "✌️"; // 가위
+      default:
+        return "";
     }
   };
 
@@ -196,16 +203,14 @@ export default function Home() {
     } catch (error: any) {
       notification.remove(notificationId);
       console.error("출금 중 오류:", error);
-      notification.error(
-        `출금 실패: ${error.message}`
-      );
+      notification.error(`출금 실패: ${error.message}`);
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center py-8">
       <h1 className="text-4xl font-bold mb-8">가위바위보 게임</h1>
-      
+
       <div className="flex flex-row justify-center gap-8">
         {/* 왼쪽 메인 게임 섹션 */}
         <div className="bg-base-100 shadow-lg rounded-lg p-6 w-96">
@@ -223,28 +228,19 @@ export default function Home() {
                 step="0.01"
                 min="0"
                 value={betAmount}
-                onChange={(e) => setBetAmount(e.target.value)}
+                onChange={e => setBetAmount(e.target.value)}
                 className="input input-bordered w-full mt-1"
                 placeholder="베팅 금액을 입력하세요"
               />
             </div>
             <div className="flex justify-between gap-2">
-              <button
-                className="btn btn-primary flex-1"
-                onClick={() => handlePlay(1)}
-              >
+              <button className="btn btn-primary flex-1" onClick={() => handlePlay(1)}>
                 ✊ 바위
               </button>
-              <button
-                className="btn btn-primary flex-1"
-                onClick={() => handlePlay(2)}
-              >
+              <button className="btn btn-primary flex-1" onClick={() => handlePlay(2)}>
                 ✋ 보
               </button>
-              <button
-                className="btn btn-primary flex-1"
-                onClick={() => handlePlay(3)}
-              >
+              <button className="btn btn-primary flex-1" onClick={() => handlePlay(3)}>
                 ✌️ 가위
               </button>
             </div>
@@ -260,13 +256,8 @@ export default function Home() {
             )}
             <div>
               <h3 className="text-sm font-semibold">잔액:</h3>
-              <p className="text-xl font-mono">
-                {contractBalance ? Number(contractBalance) / 1e18 : "0"} ETH
-              </p>
-              <button
-                className="btn btn-secondary mt-2"
-                onClick={handleWithdraw}
-              >
+              <p className="text-xl font-mono">{contractBalance ? Number(contractBalance) / 1e18 : "0"} ETH</p>
+              <button className="btn btn-secondary mt-2" onClick={handleWithdraw}>
                 컨트랙트 잔액 출금
               </button>
             </div>
@@ -277,15 +268,13 @@ export default function Home() {
         <div className="bg-base-100 shadow-lg rounded-lg p-6 w-96">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">게임 히스토리</h2>
-            <span className="bg-primary text-white px-3 py-1 rounded-full text-sm">
-              총 {gameHistory.length}게임
-            </span>
+            <span className="bg-primary text-white px-3 py-1 rounded-full text-sm">총 {gameHistory.length}게임</span>
           </div>
-          
+
           <div className="space-y-4 max-h-[80vh] overflow-y-auto pr-2 custom-scrollbar">
             {gameHistory.map((game, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="bg-base-200 rounded-xl p-4 transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
               >
                 <div className="flex justify-between items-start mb-3">
@@ -298,9 +287,7 @@ export default function Home() {
                       <span className="text-error">패배 😢</span>
                     )}
                   </div>
-                  <span className="text-xs text-gray-500">
-                    {new Date(game.timestamp).toLocaleString()}
-                  </span>
+                  <span className="text-xs text-gray-500">{new Date(game.timestamp).toLocaleString()}</span>
                 </div>
 
                 <div className="mb-3 p-2 bg-base-300 rounded-lg">
@@ -321,28 +308,41 @@ export default function Home() {
                 </div>
 
                 <div className="flex justify-between items-center mt-3">
-                  <div className={`font-semibold ${
-                    game.result === 2 ? 'text-success' : // 승리
-                    game.result === 1 ? 'text-warning' : // 무승부
-                    'text-error' // 패배
-                  }`}>
-                    {game.result === 2 ? (
-                      `+${game.betAmount} ETH`
-                    ) : game.result === 1 ? (
-                      `±0 ETH`
-                    ) : (
-                      `-${game.betAmount} ETH`
-                    )}
+                  <div
+                    className={`font-semibold ${
+                      game.result === 2
+                        ? "text-success" // 승리
+                        : game.result === 1
+                          ? "text-warning" // 무승부
+                          : "text-error" // 패배
+                    }`}
+                  >
+                    {game.result === 2
+                      ? `+${game.betAmount} ETH`
+                      : game.result === 1
+                        ? `±0 ETH`
+                        : `-${game.betAmount} ETH`}
                   </div>
-                  <a 
+                  <a
                     href={`https://arbiscan.io/tx/${game.txHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 text-xs text-primary hover:text-primary-focus transition-colors"
                   >
                     <span>트랜잭션 보기</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
                     </svg>
                   </a>
                 </div>

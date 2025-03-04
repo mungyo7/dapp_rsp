@@ -27,10 +27,10 @@ const arbitrumClient = createPublicClient({
 export const AddressStorageTab = ({ address }: { address: Address }) => {
   const [storage, setStorage] = useState<string[]>([]);
   const { chain } = useAccount();
-  
+
   // Arbitrum 체인 확인
   const isArbitrum = chain?.id === ARBITRUM_CHAIN_ID;
-  
+
   // 현재 체인에 맞는 클라이언트 선택
   const client = isArbitrum ? arbitrumClient : publicClient;
 

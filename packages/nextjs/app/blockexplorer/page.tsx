@@ -18,7 +18,7 @@ const BlockExplorer: NextPage = () => {
   const { chain } = useAccount();
   const [isLocalNetwork, setIsLocalNetwork] = useState(true);
   const [hasError, setHasError] = useState(false);
-  
+
   // Arbitrum 체인 확인
   const isArbitrum = chain?.id === ARBITRUM_CHAIN_ID;
 
@@ -46,7 +46,8 @@ const BlockExplorer: NextPage = () => {
           </p>
           <p className="m-0">
             - You are on <code className="italic bg-base-300 text-base font-bold">{targetNetwork.name}</code> .This
-            block explorer is only for <code className="italic bg-base-300 text-base font-bold">localhost</code> or <code className="italic bg-base-300 text-base font-bold">Arbitrum</code>.
+            block explorer is only for <code className="italic bg-base-300 text-base font-bold">localhost</code> or{" "}
+            <code className="italic bg-base-300 text-base font-bold">Arbitrum</code>.
           </p>
           <p className="mt-1 break-normal">
             - You can use{" "}

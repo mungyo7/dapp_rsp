@@ -22,7 +22,7 @@ const TransactionComp = ({ txHash }: { txHash: Hash }) => {
   const { chain } = useAccount();
 
   const { targetNetwork } = useTargetNetwork();
-  
+
   // Arbitrum 체인 확인
   const isArbitrum = chain?.id === ARBITRUM_CHAIN_ID;
 

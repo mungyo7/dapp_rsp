@@ -88,7 +88,7 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
   }
 
   // Arbitrum 체인인 경우 Arbitrum Block Explorer 링크 사용
-  const blockExplorerAddressLink = isArbitrum 
+  const blockExplorerAddressLink = isArbitrum
     ? `${ARBITRUM_BLOCK_EXPLORER}${checkSumAddress}`
     : getBlockExplorerAddressLink(targetNetwork, checkSumAddress);
 

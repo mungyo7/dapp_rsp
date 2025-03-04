@@ -24,7 +24,7 @@ export const SearchBar = () => {
   const [searchInput, setSearchInput] = useState("");
   const router = useRouter();
   const { chain } = useAccount();
-  
+
   // Arbitrum 체인 확인
   const isArbitrum = chain?.id === ARBITRUM_CHAIN_ID;
 

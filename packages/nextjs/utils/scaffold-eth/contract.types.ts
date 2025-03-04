@@ -7,4 +7,4 @@ export type Contract = {
 
 export type ScaffoldContract = {
   contractName: "BuyMeACoffee" | "RockPaperScissors";
-}; 
+};
