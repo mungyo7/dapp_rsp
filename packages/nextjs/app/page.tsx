@@ -164,15 +164,15 @@ export default function Home() {
     }
   };
 
-  // 선택에 따른 텍스트 반환
-  const getChoiceText = (choice: number) => {
-    switch (choice) {
-      case 1: return "바위";
-      case 2: return "보";
-      case 3: return "가위";
-      default: return "";
-    }
-  };
+  // // 선택에 따른 텍스트 반환
+  // const getChoiceText = (choice: number) => {
+  //   switch (choice) {
+  //     case 1: return "바위";
+  //     case 2: return "보";
+  //     case 3: return "가위";
+  //     default: return "";
+  //   }
+  // };
 
   // withdraw 함수 추가
   const handleWithdraw = async () => {
